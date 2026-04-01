@@ -1,3 +1,27 @@
 # config.js is intentionally excluded — copy config.example.js to config.js
 # and fill in your Spotify credentials. Never commit your Client ID to git.
 config.js
+
+# Node.js / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Android / iOS build artifacts
+android/
+ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db

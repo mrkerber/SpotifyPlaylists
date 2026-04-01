@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Spotify Year Playlist</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #1DB954;
+      --green-dark: #169a42;
+      --black:      #121212;
+      --surface:    #1e1e1e;
+      --surface2:   #2a2a2a;
+      --text:       #ffffff;
+      --text-muted: #b3b3b3;
+      --red:        #e74c3c;
+      --blue:       #3498db;
+      --radius:     12px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Circular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ── Card ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── Logo / branding ───────────────────────────────────────── */
+    .logo {
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .logo svg { width: 48px; height: 48px; }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* ── Buttons ───────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, opacity 0.15s;
+      text-decoration: none;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-green {
+      background: var(--green);
+      color: #000;
+    }
+    .btn-green:hover:not(:disabled) { background: var(--green-dark); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--surface2);
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      width: auto;
+      margin-top: 16px;
+    }
+    .btn-outline:hover:not(:disabled) { color: var(--text); border-color: #555; }
+
+    /* Large tap target for the main action button */
+    #add-btn {
+      font-size: 1.15rem;
+      padding: 20px;
+      border-radius: 16px;
+    }
+
+    /* ── Status messages ───────────────────────────────────────── */
+    #status {
+      margin-top: 24px;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      text-align: left;
+      background: var(--surface2);
+    }
+    #status.success { background: rgba(29,185,84,0.15); color: #1DB954; }
+    #status.error   { background: rgba(231,76,60,0.15);  color: #ff6b6b; }
+    #status.info    { background: rgba(52,152,219,0.15); color: var(--blue); }
+    #status.loading { background: var(--surface2); color: var(--text-muted); }
+    #status.loading::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--text-muted);
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Config warning banner ─────────────────────────────────── */
+    #config-warning {
+      background: rgba(231,76,60,0.15);
+      border: 1px solid rgba(231,76,60,0.4);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      text-align: left;
+      margin-bottom: 24px;
+      color: #ff9999;
+    }
+    #config-warning code {
+      background: rgba(255,255,255,0.1);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    #config-warning a { color: #ff9999; }
+
+    /* ── Footer note ───────────────────────────────────────────── */
+    .footer-note {
+      margin-top: 24px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Spotify logo -->
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#1DB954" d="M84 0C37.6 0 0 37.6 0 84s37.6 84 84 84 84-37.6 84-84S130.4 0 84 0zm38.6 121.2c-1.5 2.5-4.8 3.3-7.3 1.7C97.6 112 77 107.5 52.7 112.7c-2.9.6-5.7-1.2-6.3-4.1-.6-2.9 1.2-5.7 4.1-6.3C77 96.9 99.8 101.9 118 113.8c2.5 1.6 3.3 4.9 1.6 7.4zm10.3-22.9c-2 3.2-6.2 4.2-9.4 2.2C102.7 89.7 78.4 84 51.4 90.5c-3.3.8-6.6-1.2-7.4-4.5-.8-3.3 1.2-6.6 4.5-7.4 31-7.5 58.4-2.2 81.1 13 3.2 2 4.2 6.3 2.3 9.7zm.9-23.8c-2.4 3.9-7.5 5.1-11.4 2.7C100.2 63.5 72 58 41.8 65.3c-3.9.9-7.9-1.5-8.8-5.4-.9-3.9 1.5-7.9 5.4-8.8C72.5 43.2 104 49.3 127.5 65c3.9 2.4 5.2 7.6 2.3 11.5z"/>
+      </svg>
+    </span>
+
+    <h1>Year Playlist</h1>
+    <p class="subtitle">Add the song you're listening to now into a playlist grouped by its release year.</p>
+
+    <!-- Config warning (shown when config.js is missing/unconfigured) -->
+    <div id="config-warning" hidden>
+      ⚠️ <strong>Setup required.</strong><br>
+      Copy <code>config.example.js</code> to <code>config.js</code> and set your
+      <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify Client ID</a>
+      and Redirect URI. See <strong>README.md</strong> for details.
+    </div>
+
+    <!-- ── Login view ─────────────────────────────────────────── -->
+    <div data-view="login">
+      <button id="login-btn" class="btn btn-green">
+        <!-- Spotify icon -->
+        <svg width="20" height="20" viewBox="0 0 168 168" aria-hidden="true">
+          <path fill="currentColor" d="M84 0C37.6 0 0 37.6 0 84s37.6 84 84 84 84-37.6 84-84S130.4 0 84 0zm38.6 121.2c-1.5 2.5-4.8 3.3-7.3 1.7C97.6 112 77 107.5 52.7 112.7c-2.9.6-5.7-1.2-6.3-4.1-.6-2.9 1.2-5.7 4.1-6.3C77 96.9 99.8 101.9 118 113.8c2.5 1.6 3.3 4.9 1.6 7.4zm10.3-22.9c-2 3.2-6.2 4.2-9.4 2.2C102.7 89.7 78.4 84 51.4 90.5c-3.3.8-6.6-1.2-7.4-4.5-.8-3.3 1.2-6.6 4.5-7.4 31-7.5 58.4-2.2 81.1 13 3.2 2 4.2 6.3 2.3 9.7zm.9-23.8c-2.4 3.9-7.5 5.1-11.4 2.7C100.2 63.5 72 58 41.8 65.3c-3.9.9-7.9-1.5-8.8-5.4-.9-3.9 1.5-7.9 5.4-8.8C72.5 43.2 104 49.3 127.5 65c3.9 2.4 5.2 7.6 2.3 11.5z"/>
+        </svg>
+        Connect with Spotify
+      </button>
+    </div>
+
+    <!-- ── App view ───────────────────────────────────────────── -->
+    <div data-view="app" hidden>
+      <button id="add-btn" class="btn btn-green">
+        ➕ Add to Year Playlist
+      </button>
+
+      <br>
+      <button id="logout-btn" class="btn btn-outline">Log out</button>
+    </div>
+
+    <!-- Status message (shared between views) -->
+    <div id="status" hidden></div>
+
+    <p class="footer-note">
+      Playlists are created as private in your Spotify library.<br>
+      Your credentials are never stored on any server.
+    </p>
+
+  </div>
+
+  <!-- Load config first, then app logic -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
